@@ -3,6 +3,7 @@ import * as bodyParser from "body-parser";
 import * as compress from "compression";
 import * as cookieParser from "cookie-parser";
 import * as methodOverride from "method-override";
+import { DummyAsyncMiddleware } from "./middlewares/DummyAsyncMiddleware";
 
 const rootDir = __dirname;
 
@@ -14,7 +15,16 @@ export class Server {
   @Inject()
   app: PlatformApplication;
 
-  @Configuration()
+  @Configuration({
+    rootDir,
+    mount: {
+      "/rest": `${rootDir}/controllers/**/**.ts`
+    },
+    componentsScan: [
+      `${rootDir}/services/**/**.ts`,
+      `${rootDir}/middlewares/**/**.ts`
+    ]
+  })
   settings: Configuration;
 
   /**
@@ -29,6 +39,7 @@ export class Server {
       .use(bodyParser.json())
       .use(bodyParser.urlencoded({
         extended: true
-      }));
+      }))
+      .use(DummyAsyncMiddleware);
   }
 }
